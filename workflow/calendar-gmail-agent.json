@@ -1,149 +1,163 @@
-{
-  "name": "calendar_agent",
-  "nodes": [
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 6,
-              "triggerAtMinute": 5
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.4,
-      "position": [
-        0,
-        0
-      ],
-      "id": "895f63c2-fe80-4758-b11a-53dfe7537ac5",
-      "name": "Schedule Trigger"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "Look at my events/meetings for the day and identify the top two most important events.\n\nConsider the event title, description, attendees, and timing when deciding importance.\n\nThen use the Gmail tool to send me an email containing:\n\n1. The top two events\n2. Why each event is important\n\nKeep the email short and clear.\n",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        224,
-        0
-      ],
-      "id": "5e6bf572-71c3-4f3c-9704-591bb8dd6d63",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": "openai/gpt-oss-120b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        96,
-        208
-      ],
-      "id": "daf4e3fc-7d43-4f1e-ad61-6da10a0972b5",
-      "name": "Groq Chat Model"
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "calendar": {
-          "__rl": true,
-          "value": "YOUR_GOOGLE_CALENDAR_ID",
-          "mode": "id"
-        },
-        "returnAll": true,
-        "timeMin": "={{ $now.startOf('day') }}",
-        "timeMax": "={{ $now.plus({ days: 1 }).startOf('day') }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleCalendarTool",
-      "typeVersion": 1.3,
-      "position": [
-        384,
-        208
-      ],
-      "id": "06361e8a-aeed-44fd-857c-a1db51b72157",
-      "name": "Get many events in Google Calendar"
-    },
-    {
-      "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "Send an email with the top two important events of the day.",
-        "sendTo": "YOUR_EMAIL_ADDRESS",
-        "subject": "Top 2 Important Events Today",
-        "message": "AI-generated email content containing the top two most important events of the day and why each event is important.",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmailTool",
-      "typeVersion": 2.2,
-      "position": [
-        576,
-        208
-      ],
-      "id": "fc2ee50d-19c2-4c7d-9993-c96296d4ace2",
-      "name": "Send a message in Gmail",
-      "webhookId": "b4c40977-b531-4c75-93ad-19b3f8711c44"
-    }
-  ],
-  "pinData": {},
-  "connections": {
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Groq Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many events in Google Calendar": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send a message in Gmail": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  ],
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
-  },
-  "nodeGroups": [],
-  "tags": []
+﻿{
+    "name":  "calender_agent",
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "triggerAtHour":  6,
+                                                                           "triggerAtMinute":  5
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1.4,
+                      "position":  [
+                                       0,
+                                       0
+                                   ],
+                      "id":  "895f63c2-fe80-4758-b11a-53dfe7537ac5",
+                      "name":  "Schedule Trigger"
+                  },
+                  {
+                      "parameters":  {
+                                         "promptType":  "define",
+                                         "text":  "Write the email as simple plain text.\n\nDo NOT use HTML.\nDo NOT use Markdown.\nDo NOT use **, ###, tables, bullets with special symbols, or any other formatting.\n\nUse normal numbered lines like:\n\n1. Assignment Deadline (8 PM â€“ 9 PM) â€“ short reason.\n2. College Class (5 PM â€“ 6 PM) â€“ short reason.\n\nStart with:\nGood morning! Here are the two most important things on your schedule today:\n\nEnd with:\nHave a great day!\n\nKeep it natural and personal, like a simple reminder I wrote for myself.",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.agent",
+                      "typeVersion":  3.1,
+                      "position":  [
+                                       224,
+                                       0
+                                   ],
+                      "id":  "5e6bf572-71c3-4f3c-9704-591bb8dd6d63",
+                      "name":  "AI Agent"
+                  },
+                  {
+                      "parameters":  {
+                                         "model":  "openai/gpt-oss-120b",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.lmChatGroq",
+                      "typeVersion":  1,
+                      "position":  [
+                                       96,
+                                       208
+                                   ],
+                      "id":  "daf4e3fc-7d43-4f1e-ad61-6da10a0972b5",
+                      "name":  "Groq Chat Model"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "getAll",
+                                         "calendar":  {
+                                                          "__rl":  true,
+                                                          "value":  "=YOUR_EMAIL_ADDRESS",
+                                                          "mode":  "id"
+                                                      },
+                                         "returnAll":  true,
+                                         "timeMin":  "={{ $now. startOf(\u0027day\u0027) }}",
+                                         "timeMax":  "={{ $now.plus({ days: 1 }). startOf(\u0027day\u0027) }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleCalendarTool",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       384,
+                                       208
+                                   ],
+                      "id":  "06361e8a-aeed-44fd-857c-a1db51b72157",
+                      "name":  "Get many events in Google Calendar"
+                  },
+                  {
+                      "parameters":  {
+                                         "descriptionType":  "manual",
+                                         "toolDescription":  "Send a message in Gmail Send an email with the top two important events of the day.",
+                                         "sendTo":  "YOUR_EMAIL_ADDRESS",
+                                         "subject":  "Top 2 Important Events Today",
+                                         "emailType":  "text",
+                                         "message":  "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI(\u0027Message\u0027, `Send a daily email containing the top two most important calendar events.\n\nThe Message parameter must be valid HTML.\nUse \u003cp\u003e, \u003col\u003e, \u003cli\u003e, and \u003cstrong\u003e tags.\nNever use Markdown such as **, ###, or Markdown tables.\nWrite in a natural, personal tone like a simple morning reminder.`, \u0027string\u0027) }}",
+                                         "options":  {
+                                                         "appendAttribution":  false
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.gmailTool",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       576,
+                                       208
+                                   ],
+                      "id":  "fc2ee50d-19c2-4c7d-9993-c96296d4ace2",
+                      "name":  "Send a message in Gmail"
+                  }
+              ],
+    "pinData":  {
+
+                },
+    "connections":  {
+                        "Schedule Trigger":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "AI Agent",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Groq Chat Model":  {
+                                                "ai_languageModel":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "AI Agent",
+                                                                                 "type":  "ai_languageModel",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                            },
+                        "Get many events in Google Calendar":  {
+                                                                   "ai_tool":  [
+                                                                                   [
+                                                                                       {
+                                                                                           "node":  "AI Agent",
+                                                                                           "type":  "ai_tool",
+                                                                                           "index":  0
+                                                                                       }
+                                                                                   ]
+                                                                               ]
+                                                               },
+                        "Send a message in Gmail":  {
+                                                        "ai_tool":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "AI Agent",
+                                                                                "type":  "ai_tool",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                    }
+                    },
+    "active":  false,
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate"
+                 },
+    "nodeGroups":  [
+
+                   ],
+    "tags":  [
+
+             ]
 }
